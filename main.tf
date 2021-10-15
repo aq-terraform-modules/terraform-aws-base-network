@@ -12,7 +12,7 @@ resource "aws_vpc" "vpc" {
   enable_dns_support   = var.enable_dns_support
 
   tags = {
-    "Name" = "${var.name}-VPC"
+    "Name" = "${var.name}"
   }
 }
 
@@ -25,7 +25,7 @@ resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.vpc.id
 
   tags = {
-    "Name" = "${var.name}-IGW"
+    "Name" = "${var.name}"
   }
 }
 
@@ -37,7 +37,7 @@ resource "aws_route_table" "public" {
 
   vpc_id = aws_vpc.vpc.id
   tags = {
-    "Name" = "${var.name}-routetable-public"
+    "Name" = "${var.name}-public"
   }
 }
 
@@ -65,7 +65,7 @@ resource "aws_route_table" "private" {
 
   vpc_id = aws_vpc.vpc.id
   tags = {
-    "Name" = "${var.name}-routetable-private-${count.index}"
+    "Name" = "${var.name}-private-${count.index}"
   }
 }
 
@@ -83,7 +83,7 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = var.map_public_ip_on_launch
 
   tags = {
-    "Name" = "${var.name}-subnet-public-${element(var.azs, count.index)}"
+    "Name" = "${var.name}-public-${element(var.azs, count.index)}"
   }
 }
 
@@ -100,7 +100,7 @@ resource "aws_subnet" "private" {
   availability_zone_id = length(regexall("^[a-z]{2}-", element(var.azs, count.index))) == 0 ? element(var.azs, count.index) : null
 
   tags = {
-    "Name" = "${var.name}-subnet-private-${element(var.azs, count.index)}"
+    "Name" = "${var.name}-private-${element(var.azs, count.index)}"
   }
 }
 
@@ -113,7 +113,7 @@ resource "aws_eip" "nat" {
   vpc = true
 
   tags = {
-    "Name" = "${var.name}-EIP"
+    "Name" = "${var.name}"
   }
 }
 
@@ -126,7 +126,7 @@ resource "aws_nat_gateway" "nat" {
   depends_on = [aws_internet_gateway.igw]
 
   tags = {
-    "Name" = "${var.name}-NAT-${count.index}"
+    "Name" = "${var.name}-${count.index}"
   }
 }
 
