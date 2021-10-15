@@ -45,3 +45,7 @@ variable "enable_nat_gateway" {
   type        = bool
   default     = true
 }
+
+variable "name" {
+  description = "Name prefix for most of the component"
+}

@@ -10,6 +10,10 @@ resource "aws_vpc" "vpc" {
   cidr_block           = var.cidr_block
   enable_dns_hostnames = var.enable_dns_hostnames
   enable_dns_support   = var.enable_dns_support
+
+  tags = {
+    "Name" = "${var.name}-VPC"
+  }
 }
 
 ################################################################################
@@ -19,6 +23,10 @@ resource "aws_internet_gateway" "igw" {
   count = length(var.public_subnets) > 0 ? 1 : 0
 
   vpc_id = aws_vpc.vpc.id
+
+  tags = {
+    "Name" = "${var.name}-IGW"
+  }
 }
 
 ################################################################################
@@ -28,6 +36,9 @@ resource "aws_route_table" "public" {
   count = length(var.public_subnets) > 0 ? 1 : 0
 
   vpc_id = aws_vpc.vpc.id
+  tags = {
+    "Name" = "${var.name}-routetable-public-${count.index}"
+  }
 }
 
 resource "aws_route" "public_internet_gateway" {
@@ -53,6 +64,9 @@ resource "aws_route_table" "private" {
   count = local.max_subnet_length > 0 ? local.nat_gateway_count : 0
 
   vpc_id = aws_vpc.vpc.id
+  tags = {
+    "Name" = "${var.name}-routetable-private-${count.index}"
+  }
 }
 
 ################################################################################
@@ -67,6 +81,10 @@ resource "aws_subnet" "public" {
   availability_zone       = length(regexall("^[a-z]{2}-", element(var.azs, count.index))) > 0 ? element(var.azs, count.index) : null
   availability_zone_id    = length(regexall("^[a-z]{2}-", element(var.azs, count.index))) == 0 ? element(var.azs, count.index) : null
   map_public_ip_on_launch = var.map_public_ip_on_launch
+
+  tags = {
+    "Name" = "${var.name}-subnet-public-${element(var.azs, count.index)}"
+  }
 }
 
 ################################################################################
@@ -80,6 +98,10 @@ resource "aws_subnet" "private" {
   cidr_block           = var.private_subnets[count.index]
   availability_zone    = length(regexall("^[a-z]{2}-", element(var.azs, count.index))) > 0 ? element(var.azs, count.index) : null
   availability_zone_id = length(regexall("^[a-z]{2}-", element(var.azs, count.index))) == 0 ? element(var.azs, count.index) : null
+
+  tags = {
+    "Name" = "${var.name}-subnet-private-${element(var.azs, count.index)}"
+  }
 }
 
 ################################################################################
@@ -89,6 +111,10 @@ resource "aws_eip" "nat" {
   count = var.enable_nat_gateway ? local.nat_gateway_count : 0
 
   vpc = true
+
+  tags = {
+    "Name" = "${var.name}-EIP"
+  }
 }
 
 resource "aws_nat_gateway" "nat" {
@@ -98,6 +124,10 @@ resource "aws_nat_gateway" "nat" {
   subnet_id     = element(aws_subnet.public.*.id, count.index)
 
   depends_on = [aws_internet_gateway.igw]
+
+  tags = {
+    "Name" = "${var.name}-NAT-${count.index}"
+  }
 }
 
 # Create route of the private subnet since these subnets will need NAT gateway
