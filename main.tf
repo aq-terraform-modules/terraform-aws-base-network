@@ -91,7 +91,7 @@ resource "aws_eip" "nat" {
   vpc = true
 }
 
-esource "aws_nat_gateway" "nat" {
+resource "aws_nat_gateway" "nat" {
   count = var.enable_nat_gateway ? local.nat_gateway_count : 0
 
   allocation_id = element(aws_eip.nat.*.id, count.index)
