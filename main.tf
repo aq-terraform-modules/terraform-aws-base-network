@@ -16,21 +16,13 @@ resource "aws_vpc" "vpc" {
   }
 }
 
-resource "aws_default_security_group" "default_sg" {
-  vpc_id = aws_vpc.vpc.id
-
-  ingress = [
-    {
-      protocol  = -1
-      self      = true
-      from_port = 0
-      to_port   = 0
-    }
-  ]
-
-  tags = {
-    "Name" = "${var.name}-default"
-  }
+resource "aws_security_group_rule" "default_rule" {
+  type = "ingress"
+  cidr_blocks = ["0.0.0.0/0"]
+  from_port = 0
+  to_port = 0
+  protocol = "-1"
+  security_group_id = aws_vpc.vpc.default_security_group_id
 }
 
 ################################################################################
