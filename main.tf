@@ -161,11 +161,20 @@ resource "aws_route_table_association" "private" {
 
   subnet_id      = element(aws_subnet.private.*.id, count.index)
   route_table_id = element(aws_route_table.private.*.id, count.index)
+  depends_on = [
+    aws_subnet.private[count.index],
+    aws_route_table.private[count.index]
+  ]
 }
 
 resource "aws_route_table_association" "public" {
   count = length(var.public_subnets) > 0 ? length(var.public_subnets) : 0
 
   subnet_id      = element(aws_subnet.public.*.id, count.index)
-  route_table_id = aws_route_table.public[0].id
+  route_table_id = element(aws_route_table.public.*.id, count.index)
+
+  depends_on = [
+    aws_subnet.public[0],
+    aws_route_table.public[0]
+  ]
 }
