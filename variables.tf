@@ -71,7 +71,7 @@ variable "one_nat_gateway_per_az" {
 variable "create_database_subnet_group" {
   description = "Create DB subnet group or not"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "database_subnet_group_name" {

@@ -130,8 +130,8 @@ resource "aws_subnet" "isolated" {
   }
 }
 
-resource "aws_db_subnet_group" "rds" {
-  count = length(var.database_subnets) > 0 && var.create_database_subnet_group ? 1 : 0
+resource "aws_db_subnet_group" "database" {
+  count = length(var.isolated_subnets) > 0 && var.create_database_subnet_group ? 1 : 0
 
   name        = lower(coalesce(var.database_subnet_group_name, var.name))
   description = "Database subnet group for ${var.name}"

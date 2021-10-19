@@ -58,14 +58,14 @@ output "isolated_subnets_cidr_blocks" {
   value       = aws_subnet.isolated.*.cidr_block
 }
 
-output "rds_subnet_group" {
-  description = "ID of rds subnet group"
-  value       = aws_db_subnet_group.rds.*.id
+output "database_subnet_group" {
+  description = "ID of database subnet group"
+  value       = aws_db_subnet_group.database.*.id
 }
 
-output "rds_subnet_group_name" {
-  description = "Name of rds subnet group"
-  value       = aws_db_subnet_group.rds.*.name
+output "database_subnet_group_name" {
+  description = "Name of database subnet group"
+  value       = aws_db_subnet_group.database.*.name
 }
 
 output "public_subnets" {
