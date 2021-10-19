@@ -43,6 +43,31 @@ output "private_subnets_cidr_blocks" {
   value       = aws_subnet.private.*.cidr_block
 }
 
+output "isolated_subnets" {
+  description = "List of IDs of isolated subnets"
+  value       = aws_subnet.isolated.*.id
+}
+
+output "isolated_subnet_arns" {
+  description = "List of ARNs of isolated subnets"
+  value       = aws_subnet.isolated.*.arn
+}
+
+output "isolated_subnets_cidr_blocks" {
+  description = "List of cidr_blocks of isolated subnets"
+  value       = aws_subnet.isolated.*.cidr_block
+}
+
+output "rds_subnet_group" {
+  description = "ID of rds subnet group"
+  value       = aws_db_subnet_group.rds.*.id
+}
+
+output "rds_subnet_group_name" {
+  description = "Name of rds subnet group"
+  value       = aws_db_subnet_group.rds.*.name
+}
+
 output "public_subnets" {
   description = "List of IDs of public subnets"
   value       = aws_subnet.public.*.id
@@ -75,10 +100,10 @@ output "natgw_ids" {
 
 output "igw_id" {
   description = "The ID of the Internet Gateway"
-  value       = concat(aws_internet_gateway.igw.*.id, [""])[0]
+  value       = aws_internet_gateway.igw.*.id
 }
 
 output "igw_arn" {
   description = "The ARN of the Internet Gateway"
-  value       = concat(aws_internet_gateway.igw.*.arn, [""])[0]
+  value       = aws_internet_gateway.igw.*.arn
 }

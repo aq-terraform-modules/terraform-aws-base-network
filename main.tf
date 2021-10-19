@@ -1,5 +1,5 @@
 locals {
-  nat_gateway_count = length(var.azs)
+  nat_gateway_count = var.single_nat_gateway ? 1 : var.one_nat_gateway_per_az ? length(var.azs) : local.max_subnet_length
 
   max_subnet_length = max(
     length(var.private_subnets)
@@ -114,6 +114,35 @@ resource "aws_subnet" "private" {
 }
 
 ################################################################################
+# Isolated subnet
+################################################################################
+
+resource "aws_subnet" "isolated" {
+  count = length(var.isolated_subnets) > 0 ? length(var.isolated_subnets) : 0
+
+  vpc_id               = aws_vpc.vpc.id
+  cidr_block           = var.isolated_subnets[count.index]
+  availability_zone    = length(regexall("^[a-z]{2}-", element(var.azs, count.index))) > 0 ? element(var.azs, count.index) : null
+  availability_zone_id = length(regexall("^[a-z]{2}-", element(var.azs, count.index))) == 0 ? element(var.azs, count.index) : null
+
+  tags = {
+    "Name" = "${var.name}-isolated-${element(var.azs, count.index)}"
+  }
+}
+
+resource "aws_db_subnet_group" "rds" {
+  count = length(var.database_subnets) > 0 && var.create_database_subnet_group ? 1 : 0
+
+  name        = lower(coalesce(var.database_subnet_group_name, var.name))
+  description = "Database subnet group for ${var.name}"
+  subnet_ids  = aws_subnet.isolated.*.id
+
+  tags = {
+    "Name" = "${lower(coalesce(var.database_subnet_group_name, var.name))}"
+  }
+}
+
+################################################################################
 # NAT Gateway
 ################################################################################
 resource "aws_eip" "nat" {
@@ -122,7 +151,7 @@ resource "aws_eip" "nat" {
   vpc = true
 
   tags = {
-    "Name" = "${var.name}"
+    "Name" = "${var.name}-${element(var.azs, count.index)}"
   }
 }
 
@@ -135,7 +164,7 @@ resource "aws_nat_gateway" "nat" {
   depends_on = [aws_internet_gateway.igw]
 
   tags = {
-    "Name" = "${var.name}-${count.index}"
+    "Name" = "${var.name}-${element(var.azs, count.index)}"
   }
 }
 
@@ -160,7 +189,7 @@ resource "aws_route_table_association" "private" {
   count = length(var.private_subnets) > 0 ? length(var.private_subnets) : 0
 
   subnet_id      = element(aws_subnet.private.*.id, count.index)
-  route_table_id = element(aws_route_table.private.*.id, count.index)
+  route_table_id = element(aws_route_table.private.*.id, var.single_nat_gateway ? 0 : count.index)
   depends_on = [
     aws_subnet.private,
     aws_route_table.private
@@ -171,7 +200,7 @@ resource "aws_route_table_association" "public" {
   count = length(var.public_subnets) > 0 ? length(var.public_subnets) : 0
 
   subnet_id      = element(aws_subnet.public.*.id, count.index)
-  route_table_id = element(aws_route_table.public.*.id, count.index)
+  route_table_id = aws_route_table.public[0].id
 
   depends_on = [
     aws_subnet.public[0],

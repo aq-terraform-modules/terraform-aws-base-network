@@ -34,10 +34,20 @@ variable "public_subnets" {
   default     = []
 }
 
+variable "isolated_subnets" {
+  description = "Isolated subnets that will be used for RDS subnet group"
+  type        = list(string)
+  default     = []
+}
+
 variable "map_public_ip_on_launch" {
   description = "Should be false if you do not want to auto-assign public IP on launch"
   type        = bool
   default     = true
+}
+
+variable "name" {
+  description = "Name prefix for most of the component"
 }
 
 variable "enable_nat_gateway" {
@@ -46,6 +56,25 @@ variable "enable_nat_gateway" {
   default     = true
 }
 
-variable "name" {
-  description = "Name prefix for most of the component"
+variable "single_nat_gateway" {
+  description = "One NGW used for all private subnet"
+  type        = bool
+  default     = true
+}
+
+variable "one_nat_gateway_per_az" {
+  description = "One NGW per az"
+  type        = bool
+  default     = false
+}
+
+variable "create_database_subnet_group" {
+  description = "Create DB subnet group or not"
+  type        = bool
+  default     = true
+}
+
+variable "database_subnet_group_name" {
+  description = "Subnet group name for DB"
+  default     = ""
 }
